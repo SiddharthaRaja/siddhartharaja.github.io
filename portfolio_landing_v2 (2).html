@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Siddhartha Raja</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes dotPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.6); }
+  }
+
+  /* ── Sticky nav ── */
+  .pnav-sticky {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1.8rem;
+    padding: 0.85rem 2rem;
+    background: rgba(8,8,8,0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 0.5px solid #161616;
+    opacity: 0;
+    animation: fadeIn 0.5s ease 0.1s forwards;
+  }
+  .nav-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #888;
+    letter-spacing: -0.01em;
+    margin-right: auto;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    transform: translateX(-6px);
+  }
+  .nav-name.show { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  .pnav-sticky a {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #555;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    position: relative;
+    transition: color 0.25s ease;
+    white-space: nowrap;
+  }
+  .pnav-sticky a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0;
+    width: 100%; height: 0.5px;
+    background: #555;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .pnav-sticky a:hover { color: #aaa; }
+  .pnav-sticky a:hover::after { transform: scaleX(1); }
+
+  /* ── Base ── */
+  body { background: #080808; }
+  .pw {
+    background: #080808;
+    color: #e0ddd8;
+    font-family: 'DM Sans', sans-serif;
+    padding: 5rem 2rem 3rem;
+    min-height: 600px;
+    overflow-x: hidden;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* ── Editable ── */
+  [contenteditable="true"] {
+    outline: none; border-radius: 2px;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+    cursor: text;
+  }
+  [contenteditable="true"]:hover { background: rgba(255,255,255,0.03); box-shadow: 0 0 0 1px rgba(255,255,255,0.05); }
+  [contenteditable="true"]:focus { background: rgba(255,255,255,0.05); box-shadow: 0 0 0 1px rgba(46,92,58,0.4); }
+  .edit-hint {
+    position: fixed; bottom: 1.4rem; left: 50%; transform: translateX(-50%);
+    font-family: 'DM Sans', sans-serif; font-size: 10px; color: #2e5c3a;
+    letter-spacing: 0.1em; text-transform: uppercase; background: #0f0f0f;
+    border: 0.5px solid #1e3a25; padding: 5px 14px; border-radius: 20px;
+    pointer-events: none; opacity: 0; transition: opacity 0.4s ease; z-index: 200;
+  }
+  .edit-hint.show { opacity: 1; }
+
+  /* ── Hero ── */
+  .phero { margin-bottom: 4rem; border-bottom: 0.5px solid #1c1c1c; padding-bottom: 3rem; }
+  .peyebrow {
+    font-size: 10px; letter-spacing: 0.18em; color: #3a3a3a;
+    text-transform: uppercase; margin-bottom: 1.2rem; font-family: 'Syne', sans-serif;
+    opacity: 0; animation: fadeUp 0.55s ease 0.25s forwards;
+  }
+  .pname {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: clamp(32px, 5vw, 52px); line-height: 1.0; color: #f0ece4;
+    margin-bottom: 1.4rem; letter-spacing: -0.03em; white-space: nowrap;
+    opacity: 0; animation: fadeUp 0.6s ease 0.35s forwards;
+  }
+  @media (max-width: 420px) { .pname { white-space: normal; } }
+  .ptagline {
+    font-size: 14px; color: #505050; line-height: 1.75; max-width: 480px; font-weight: 300;
+    opacity: 0; animation: fadeUp 0.6s ease 0.45s forwards;
+  }
+  .pctas {
+    display: flex; gap: 8px; margin-top: 1.8rem; flex-wrap: wrap;
+    opacity: 0; animation: fadeUp 0.6s ease 0.55s forwards;
+  }
+  .pbtn {
+    background: transparent; color: #505050; font-size: 11px; padding: 7px 16px;
+    border-radius: 3px; text-decoration: none; border: 0.5px solid #222;
+    letter-spacing: 0.04em; font-family: 'DM Sans', sans-serif;
+    transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease, transform 0.2s ease;
+  }
+  .pbtn-lit { border-color: #383838; color: #888; }
+  .pbtn:hover { color: #ccc; border-color: #555; background: #111; transform: translateY(-1px); }
+
+  .section-anchor { display: block; position: relative; top: -80px; visibility: hidden; }
+
+  .psec-label {
+    font-size: 10px; letter-spacing: 0.18em; color: #2e2e2e; text-transform: uppercase;
+    margin-bottom: 1.5rem; font-family: 'Syne', sans-serif;
+    opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .psec-label.visible { opacity: 1; transform: translateY(0); }
+
+  .pabout {
+    margin-bottom: 4rem; border-bottom: 0.5px solid #1c1c1c; padding-bottom: 3rem;
+    opacity: 0; transform: translateY(18px); transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+  .pabout.visible { opacity: 1; transform: translateY(0); }
+  .pabout-body { font-size: 13px; color: #484848; line-height: 1.8; font-weight: 300; max-width: 520px; }
+
+  /* ── Project ── */
+  .pproject {
+    border-bottom: 0.5px solid #141414;
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+  .pproject:first-of-type { border-top: 0.5px solid #141414; }
+  .pproject.visible { opacity: 1; transform: translateY(0); }
+
+  /* Always-visible default content */
+  .pproject-default {
+    padding: 1.4rem 0 0 0;
+    display: grid;
+    grid-template-columns: 60px 1fr auto;
+    gap: 0 1.5rem;
+    align-items: start;
+  }
+
+  .pnum { font-family: 'Syne', sans-serif; font-size: 10px; color: #333; letter-spacing: 0.08em; padding-top: 3px; }
+
+  .pproject-meta { display: flex; flex-direction: column; gap: 0.3rem; }
+
+  .pstatus {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 9px; color: #2e5c3a; letter-spacing: 0.06em;
+    font-family: 'Syne', sans-serif;
+  }
+  .pdot {
+    width: 4px; height: 4px; border-radius: 50%; background: #2e5c3a;
+    animation: dotPulse 2.2s ease-in-out infinite;
+  }
+
+  .ptitle-row { display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap; }
+  .ptitle {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+    color: #d0ccc5; line-height: 1.3;
+  }
+  .ptitle-gh {
+    font-family: 'DM Sans', sans-serif; font-size: 10px; color: #383838;
+    text-decoration: none; letter-spacing: 0.04em; white-space: nowrap;
+    transition: color 0.2s ease;
+  }
+  .ptitle-gh:hover { color: #666; }
+
+  /* desc + tags always shown */
+  .pproject-summary {
+    padding: 0.7rem 0 1.2rem 4.2rem;
+  }
+  .pdesc {
+    font-size: 12px; color: #505050; line-height: 1.7; font-weight: 300;
+    margin-bottom: 0.85rem; max-width: 520px;
+  }
+  .ptags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .ptag {
+    font-size: 10px; color: #4a4a4a; background: #111;
+    padding: 2px 8px; border-radius: 4px; letter-spacing: 0.02em;
+  }
+  .ptag-hi { color: #787878; background: #161616; border: 0.5px solid #2a2a2a; border-radius: 4px; }
+
+  /* The clickable "expand more" bar */
+  .pproject-expander {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0 0.55rem 4.2rem;
+    cursor: pointer;
+    user-select: none;
+    border-top: 0.5px solid #111;
+    transition: background 0.2s ease;
+  }
+  .pproject-expander:hover { background: #0a0a0a; }
+  .pproject-expander:hover .exp-label { color: #555; }
+  .pproject-expander:hover .exp-chevron { color: #555; }
+
+  .exp-label {
+    font-family: 'DM Sans', sans-serif; font-size: 10px;
+    color: #2e2e2e; letter-spacing: 0.1em; text-transform: uppercase;
+    transition: color 0.2s ease;
+  }
+  .exp-chevron {
+    width: 11px; height: 11px; color: #2e2e2e;
+    transition: transform 0.35s ease, color 0.2s ease;
+    flex-shrink: 0;
+  }
+  .pproject.open .exp-chevron { transform: rotate(180deg); }
+  .pproject.open .exp-label-text::before { content: 'Less'; }
+  .exp-label-text::before { content: 'More'; }
+
+  /* Expanded deep-dive content */
+  .pproject-extra {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.42s ease;
+  }
+  .pproject.open .pproject-extra { grid-template-rows: 1fr; }
+  .pproject-extra-inner { overflow: hidden; }
+  .pproject-extra-pad {
+    padding: 1.2rem 0 1.6rem 4.2rem;
+    border-top: 0.5px solid #0f0f0f;
+    display: flex; flex-direction: column; gap: 1.2rem;
+  }
+
+  /* Key results block */
+  .pextra-section-label {
+    font-family: 'Syne', sans-serif; font-size: 9px; color: #2a2a2a;
+    letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 0.5rem;
+  }
+  .pextra-results {
+    display: flex; flex-direction: column; gap: 0.4rem;
+  }
+  .pextra-result {
+    display: flex; align-items: baseline; gap: 0.6rem;
+  }
+  .pextra-result-val {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    color: #5a8a68; letter-spacing: -0.01em; white-space: nowrap;
+  }
+  .pextra-result-label {
+    font-size: 11px; color: #3e3e3e; font-weight: 300; line-height: 1.5;
+  }
+  .pextra-detail {
+    font-size: 12px; color: #424242; line-height: 1.75; font-weight: 300; max-width: 520px;
+  }
+  .pextra-detail [contenteditable="true"] { display: inline; }
+
+  /* date in default area */
+  .pdate {
+    font-size: 11px; color: #333; font-family: 'Syne', sans-serif;
+    letter-spacing: 0.04em; white-space: nowrap; padding-top: 3px; text-align: right;
+  }
+
+  /* ── Footer ── */
+  .pfooter {
+    margin-top: 3rem; display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 0.8rem;
+    opacity: 0; transform: translateY(10px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .pfooter.visible { opacity: 1; transform: translateY(0); }
+  .pfooter-links { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+  .pfooter-links a {
+    font-size: 11px; color: #383838; text-decoration: none;
+    position: relative; transition: color 0.25s ease;
+  }
+  .pfooter-links a::after {
+    content: ''; position: absolute; bottom: -1px; left: 0;
+    width: 100%; height: 0.5px; background: currentColor;
+    transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease;
+  }
+  .pfooter-links a:hover { color: #606060; }
+  .pfooter-links a:hover::after { transform: scaleX(1); }
+  .pfooter-note { font-size: 10px; color: #303030; font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="edit-hint" id="editHint">Click any text to edit</div>
+
+<nav class="pnav-sticky" id="stickyNav">
+  <span class="nav-name" id="navName">Siddhartha Raja</span>
+  <a href="#projects">Projects</a>
+  <a href="#about">About</a>
+  <a href="https://github.com/SiddharthaRaja" target="_blank" rel="noopener">GitHub ↗</a>
+  <a href="https://linkedin.com/in/siddhartha-raja-tammana" target="_blank" rel="noopener">LinkedIn ↗</a>
+  <a href="#" target="_blank" rel="noopener">Resume ↗</a>
+</nav>
+
+<div class="pw">
+
+  <div class="phero">
+    <div class="peyebrow" contenteditable="true">BITS Pilani Hyderabad · ML Researcher</div>
+    <div class="pname" id="heroName" contenteditable="true">Siddhartha Raja</div>
+    <div class="ptagline" contenteditable="true">Building multimodal systems, adversarial evaluation frameworks, and NLP pipelines — with a focus on rigorous, honest science.</div>
+    <div class="pctas">
+      <a href="https://github.com/SiddharthaRaja" target="_blank" rel="noopener" class="pbtn pbtn-lit">GitHub ↗</a>
+      <a href="https://linkedin.com/in/siddhartha-raja-tammana" target="_blank" rel="noopener" class="pbtn pbtn-lit">LinkedIn ↗</a>
+      <a href="#" target="_blank" rel="noopener" class="pbtn">Resume ↗</a>
+      <a href="mailto:siddhartharaja36@gmail.com" class="pbtn">Contact</a>
+    </div>
+  </div>
+
+  <span class="section-anchor" id="about"></span>
+  <div class="psec-label reveal">About</div>
+  <div class="pabout reveal">
+    <div class="pabout-body" contenteditable="true">I'm a final-year CS student at BITS Pilani Hyderabad specialising in machine learning research. My work spans multimodal learning, NLP, and AI safety — with a strong emphasis on reproducibility and avoiding inflated results. I care deeply about building systems that are honest, robust, and well-evaluated.
+
+Previously worked on TCGA cancer subtype classification on HPC clusters, adversarial LLM evaluation, and retrieval-augmented generation pipelines. Looking for research internships where rigour matters.</div>
+  </div>
+
+  <span class="section-anchor" id="projects"></span>
+  <div class="psec-label reveal">Selected Projects</div>
+
+  <!-- ── Project 01 ── -->
+  <div class="pproject reveal">
+    <!-- always-visible header -->
+    <div class="pproject-default">
+      <div class="pnum">01</div>
+      <div class="pproject-meta">
+        <div class="pstatus"><span class="pdot"></span>ONGOING</div>
+        <div class="ptitle-row">
+          <span class="ptitle" contenteditable="true">Multimodal TCGA-BRCA Subtype Classifier</span>
+          <a href="https://github.com/SiddharthaRaja/tcga-brca-classifier" target="_blank" rel="noopener" class="ptitle-gh">GitHub ↗</a>
+        </div>
+      </div>
+      <div class="pdate" contenteditable="true">Jan 2026 – Present</div>
+    </div>
+    <!-- always-visible summary -->
+    <div class="pproject-summary">
+      <div class="pdesc" contenteditable="true">Predicting breast cancer IHC subtypes from genomics + histology without receptor testing. Identified and resolved fundamental feature leakage inflating accuracy to 86% — rebuilt honest pipeline achieving ROC-AUC 0.76.</div>
+      <div class="ptags">
+        <span class="ptag ptag-hi" contenteditable="true">PyTorch</span>
+        <span class="ptag ptag-hi" contenteditable="true">XGBoost</span>
+        <span class="ptag" contenteditable="true">HPC</span>
+        <span class="ptag" contenteditable="true">SLURM</span>
+        <span class="ptag" contenteditable="true">H100</span>
+        <span class="ptag" contenteditable="true">OpenSlide</span>
+      </div>
+    </div>
+    <!-- expander bar -->
+    <div class="pproject-expander" onclick="toggleProject(this)">
+      <svg class="exp-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <span class="exp-label"><span class="exp-label-text"></span> details</span>
+    </div>
+    <!-- expanded deep-dive -->
+    <div class="pproject-extra">
+      <div class="pproject-extra-inner">
+        <div class="pproject-extra-pad">
+          <div>
+            <div class="pextra-section-label">Key Results</div>
+            <div class="pextra-results">
+              <div class="pextra-result">
+                <span class="pextra-result-val" contenteditable="true">ROC-AUC 0.76</span>
+                <span class="pextra-result-label" contenteditable="true">on honest pipeline after removing feature leakage</span>
+              </div>
+              <div class="pextra-result">
+                <span class="pextra-result-val" contenteditable="true">86% → corrected</span>
+                <span class="pextra-result-label" contenteditable="true">inflated accuracy identified and eliminated via data audit</span>
+              </div>
+              <div class="pextra-result">
+                <span class="pextra-result-val" contenteditable="true">4 subtypes</span>
+                <span class="pextra-result-label" contenteditable="true">HER2+, HR+, TNBC, HR+/HER2+ classified from genomic + histology fusion</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="pextra-section-label">Approach</div>
+            <div class="pextra-detail" contenteditable="true">Combined RNA-seq gene expression features with whole-slide image (WSI) patch embeddings extracted via OpenSlide. Fused modalities using late-fusion XGBoost ensemble trained on TCGA-BRCA cohort. Ran on BITS HPC cluster using SLURM job scheduling across NVIDIA H100 nodes. Emphasis throughout on rigorous train/val/test splits with no label leakage.</div>
+          </div>
+          <div>
+            <div class="pextra-section-label">What I Learned</div>
+            <div class="pextra-detail" contenteditable="true">Discovered that naive feature concatenation from clinical metadata caused target leakage — a subtle bug that inflated metrics significantly. Rebuilt the entire preprocessing pipeline from scratch with strict data isolation. This project fundamentally shaped how I think about evaluation integrity in ML.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Project 02 ── -->
+  <div class="pproject reveal" style="transition-delay:0.07s">
+    <div class="pproject-default">
+      <div class="pnum">02</div>
+      <div class="pproject-meta">
+        <div class="ptitle-row">
+          <span class="ptitle" contenteditable="true">Adversarial LLM Benchmarking Framework</span>
+          <a href="https://github.com/SiddharthaRaja/adversarial-llm-benchmark" target="_blank" rel="noopener" class="ptitle-gh">GitHub ↗</a>
+        </div>
+      </div>
+      <div class="pdate" contenteditable="true">Apr – May 2026</div>
+    </div>
+    <div class="pproject-summary">
+      <div class="pdesc" contenteditable="true">GPU-accelerated robustness evaluation of open-source LLMs across 7 adversarial attack categories. TinyLlama: 75% jailbreak susceptibility vs Mistral's 6% harmful compliance rate.</div>
+      <div class="ptags">
+        <span class="ptag ptag-hi" contenteditable="true">AI Safety</span>
+        <span class="ptag ptag-hi" contenteditable="true">HuggingFace</span>
+        <span class="ptag" contenteditable="true">NVIDIA H100</span>
+        <span class="ptag" contenteditable="true">Streamlit</span>
+        <span class="ptag" contenteditable="true">Plotly</span>
+      </div>
+    </div>
+    <div class="pproject-expander" onclick="toggleProject(this)">
+      <svg class="exp-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <span class="exp-label"><span class="exp-label-text"></span> details</span>
+    </div>
+    <div class="pproject-extra">
+      <div class="pproject-extra-inner">
+        <div class="pproject-extra-pad">
+          <div>
+            <div class="pextra-section-label">Key Results</div>
+            <div class="pextra-results">
+              <div class="pextra-result">
+                <span class="pextra-result-val" contenteditable="true">75% susceptibility</span>
+                <span class="pextra-result-label" contenteditable="true">TinyLlama jailbreak rate across adversarial prompt categories</span>
+              </div>
+              <div class="pextra-result">
+                <span class="pextra-result-val" contenteditable="true">6% compliance</span>
+                <span class="pextra-result-label" contenteditable="true">Mistral-7B harmful response rate — strongest open-source performer</span>
+              </div>
+              <div class="pextra-result">
+                <span class="pextra-result-val" contenteditable="true">7 attack types</span>
+                <span class="pextra-result-label" contenteditable="true">prompt injection, role-play bypass, jailbreak templates, and more</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="pextra-section-label">Approach</div>
+            <div class="pextra-detail" contenteditable="true">Built a modular evaluation harness in Python that runs batched adversarial prompts against HuggingFace-hosted models on H100 GPUs. Defined a taxonomy of 7 attack categories including direct jailbreaks, indirect injections, and role-play bypasses. Results visualised in an interactive Streamlit dashboard with per-model, per-category breakdowns.</div>
+          </div>
+          <div>
+            <div class="pextra-section-label">What I Learned</div>
+            <div class="pextra-detail" contenteditable="true">Model scale alone doesn't determine safety — alignment training methodology matters far more. Smaller models with RLHF (Mistral) significantly outperformed larger models without it. This work deepened my interest in AI safety evaluation as a discipline distinct from capability benchmarking.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Project 03 ── -->
+  <div class="pproject reveal" style="transition-delay:0.14s">
+    <div class="pproject-default">
+      <div class="pnum">03</div>
+      <div class="pproject-meta">
+        <div class="ptitle-row">
+          <span class="ptitle" contenteditable="true">RAG System for Scientific Literature</span>
+          <a href="https://github.com/SiddharthaRaja/rag-scientific-literature" target="_blank" rel="noopener" class="ptitle-gh">GitHub ↗</a>
+        </div>
+      </div>
+      <div class="pdate" contenteditable="true">Feb – Mar 2026</div>
+    </div>
+    <div class="pproject-summary">
+      <div class="pdesc" contenteditable="true">End-to-end retrieval-augmented generation pipeline with hybrid retrieval, query expansion, and citation grounding to minimize hallucinations across large document collections.</div>
+      <div class="ptags">
+        <span class="ptag ptag-hi" contenteditable="true">RAG</span>
+        <span class="ptag" contenteditable="true">TF-IDF</span>
+        <span class="ptag" contenteditable="true">Semantic Chunking</span>
+        <span class="ptag" contenteditable="true">NLP</span>
+      </div>
+    </div>
+    <div class="pproject-expander" onclick="toggleProject(this)">
+      <svg class="exp-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <span class="exp-label"><span class="exp-label-text"></span> details</span>
+    </div>
+    <div class="pproject-extra">
+      <div class="pproject-extra-inner">
+        <div class="pproject-extra-pad">
+          <div>
+            <div class="pextra-section-label">Key Results</div>
+            <div class="pextra-results">
+              <div class="pextra-result">
+                <span class="pextra-result-val" contenteditable="true">Hybrid retrieval</span>
+                <span class="pextra-result-label" contenteditable="true">TF-IDF + dense embedding fusion outperformed either method alone</span>
+              </div>
+              <div class="pextra-result">
+                <span class="pextra-result-val" contenteditable="true">Citation grounding</span>
+                <span class="pextra-result-label" contenteditable="true">every generated answer linked to source paragraph with confidence score</span>
+              </div>
+              <div class="pextra-result">
+                <span class="pextra-result-val" contenteditable="true">Query expansion</span>
+                <span class="pextra-result-label" contenteditable="true">HyDE-inspired rewriting improved recall on ambiguous scientific queries</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="pextra-section-label">Approach</div>
+            <div class="pextra-detail" contenteditable="true">Ingested PDFs via semantic chunking (respecting section boundaries), indexed with both TF-IDF and sentence-transformer embeddings. At query time, retrieved top-k chunks from both indices and re-ranked with cross-encoder. Generation via a locally-hosted LLM with strict citation constraints — the model was prompted to refuse answers it couldn't ground.</div>
+          </div>
+          <div>
+            <div class="pextra-section-label">What I Learned</div>
+            <div class="pextra-detail" contenteditable="true">Hallucination reduction is primarily a retrieval problem, not a generation problem. The quality of chunking and retrieval had far more impact than prompt engineering the LLM. Hybrid retrieval consistently beat pure dense or sparse approaches on scientific text.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Project 04 ── -->
+  <div class="pproject reveal" style="transition-delay:0.21s">
+    <div class="pproject-default">
+      <div class="pnum">04</div>
+      <div class="pproject-meta">
+        <div class="ptitle-row">
+          <span class="ptitle" contenteditable="true">Explicit Content Text Classifier</span>
+          <a href="https://github.com/SiddharthaRaja/explicit-content-classifier" target="_blank" rel="noopener" class="ptitle-gh">GitHub ↗</a>
+        </div>
+      </div>
+      <div class="pdate" contenteditable="true">Aug – Dec 2024</div>
+    </div>
+    <div class="pproject-summary">
+      <div class="pdesc" contenteditable="true">Linear SVM with full NLP preprocessing achieving 0.86 precision and 0.96 recall. 3-tier confidence thresholding with a NEEDS REVIEW band for safety-critical content moderation pipelines.</div>
+      <div class="ptags">
+        <span class="ptag ptag-hi" contenteditable="true">scikit-learn</span>
+        <span class="ptag" contenteditable="true">spaCy</span>
+        <span class="ptag" contenteditable="true">NLTK</span>
+        <span class="ptag" contenteditable="true">NLP</span>
+      </div>
+    </div>
+    <div class="pproject-expander" onclick="toggleProject(this)">
+      <svg class="exp-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <span class="exp-label"><span class="exp-label-text"></span> details</span>
+    </div>
+    <div class="pproject-extra">
+      <div class="pproject-extra-inner">
+        <div class="pproject-extra-pad">
+          <div>
+            <div class="pextra-section-label">Key Results</div>
+            <div class="pextra-results">
+              <div class="pextra-result">
+                <span class="pextra-result-val" contenteditable="true">0.86 precision</span>
+                <span class="pextra-result-label" contenteditable="true">very low false positive rate — critical for user-facing moderation</span>
+              </div>
+              <div class="pextra-result">
+                <span class="pextra-result-val" contenteditable="true">0.96 recall</span>
+                <span class="pextra-result-label" contenteditable="true">near-complete coverage of explicit content in test corpus</span>
+              </div>
+              <div class="pextra-result">
+                <span class="pextra-result-val" contenteditable="true">3-tier system</span>
+                <span class="pextra-result-label" contenteditable="true">SAFE / NEEDS REVIEW / BLOCK — human-in-the-loop on uncertain cases</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="pextra-section-label">Approach</div>
+            <div class="pextra-detail" contenteditable="true">Built full NLP preprocessing pipeline: tokenisation, lemmatisation (spaCy), stopword removal, n-gram feature extraction. Trained Linear SVM on TF-IDF features. The key design decision was the 3-tier confidence band — instead of binary classification, uncertain predictions in the middle confidence range are flagged for human review, reducing both false positives and false negatives in production.</div>
+          </div>
+          <div>
+            <div class="pextra-section-label">What I Learned</div>
+            <div class="pextra-detail" contenteditable="true">For safety-critical classifiers, optimising for a single metric is wrong. Precision and recall trade off differently depending on the harm model. A simple linear classifier with careful thresholding and human escalation outperforms a complex model with a single decision boundary.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfooter reveal">
+    <div class="pfooter-links">
+      <a href="https://linkedin.com/in/siddhartha-raja-tammana" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="mailto:siddhartharaja36@gmail.com">siddhartharaja36@gmail.com</a>
+      <a href="https://github.com/SiddharthaRaja" target="_blank" rel="noopener">github.com/SiddharthaRaja ↗</a>
+    </div>
+    <div class="pfooter-note" contenteditable="true">Open to Internship Opportunities · 2026</div>
+  </div>
+
+</div>
+
+<script>
+  // ── Scroll reveal ──
+  const revealEls = document.querySelectorAll('.reveal');
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.05, rootMargin: '0px 0px -10px 0px' });
+  revealEls.forEach(el => revealObserver.observe(el));
+
+  // ── Name in nav ──
+  const heroName = document.getElementById('heroName');
+  const navName  = document.getElementById('navName');
+  const nameObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      navName.classList.toggle('show', !entry.isIntersecting);
+    });
+  }, { threshold: 0, rootMargin: '-60px 0px 0px 0px' });
+  nameObserver.observe(heroName);
+
+  // ── Accordion: toggle the extra section ──
+  function toggleProject(expander) {
+    const project = expander.closest('.pproject');
+    project.classList.toggle('open');
+  }
+
+  // ── Edit hint ──
+  const hint = document.getElementById('editHint');
+  let hintShown = false;
+  document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+    el.addEventListener('focus', () => {
+      if (!hintShown) {
+        hint.classList.add('show');
+        setTimeout(() => hint.classList.remove('show'), 2500);
+        hintShown = true;
+      }
+    });
+  });
+</script>
+</body>
+</html>
